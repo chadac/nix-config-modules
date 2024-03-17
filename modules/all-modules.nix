@@ -1,0 +1,12 @@
+[
+  ./apps.nix
+  ./flags.nix
+  ./home.nix
+  ./hosts.nix
+  ./modules.nix
+  ./nixos.nix
+  ./nixpkgs.nix
+  ./apps/defaults.nix
+  ./apps/single-user.nix
+  ./apps/getting-started.nix
+]

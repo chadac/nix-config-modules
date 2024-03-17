@@ -1,0 +1,6 @@
+{ inputs, ... }:
+let
+in {
+  config = {
+  };
+}
