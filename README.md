@@ -172,8 +172,6 @@ on a per-host basis:
       };
     };
 
-Thus you do have the option to add any host-specific flags.
-
 ## FAQ
 
 ### Can you provide a template to get started?
@@ -187,3 +185,15 @@ Technically you can disable home-manager with
     nix-config.defaultTags.home-manager = false;
 
 That'll remove any NixOS integrations to make HM work.
+
+### your tags mechanism sucks
+
+yeah I know
+
+### your nix code organization sucks
+
+yeah I know
+
+### you're needlessly doing this deferred modules thing and you could simplify this
+
+ok I didn't know that
