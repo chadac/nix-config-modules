@@ -5,8 +5,21 @@ let
     mkOption
     types
   ;
+  globalHomeModules = config.modules.home-manager;
+
+  hostSubmodule = types.submodule ({ config, ... }: {
+    options._internal.homeModules = mkOption { type = types.listOf types.deferredModule; };
+    config._internal.homeModules =
+      globalHomeModules
+      ++ (map (app: app.home) config._internal.apps)
+      ++ [ config.config.home ];
+  });
 in {
   options = {
+    hosts = mkOption {
+      type = types.attrsOf hostSubmodule;
+    };
+
     homeConfigurations = mkOption {
       type = types.lazyAttrsOf types.raw;
       default = { };
@@ -18,22 +31,15 @@ in {
 
   config = {
     homeConfigurations = mapAttrs
-      (_: hostConfig: let
-        host = hostConfig // { tags = config.defaultTags // hostConfig.tags; };
-        appModules = map
-          (app: app.home)
-          (builtins.filter
-            (app: app.enablePredicate { inherit host app; })
-            (lib.attrValues config.apps));
-      in
+      (_: host:
         inputs.home-manager.lib.homeManagerConfiguration {
-          pkgs = host.pkgs;
+          pkgs = host._internal.pkgs;
           extraSpecialArgs = {
             inherit host;
           };
           modules = builtins.addErrorContext
             "while importing home-manager definitions"
-            (config.modules.home-manager ++ appModules ++ [ host.config.home ]);
+            host._internal.homeModules;
         })
       config.hosts
     ;

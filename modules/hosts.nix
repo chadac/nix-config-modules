@@ -1,4 +1,4 @@
-{ inputs, lib, config, ... }@args:
+{ inputs, lib, ... }@args:
 let
   inherit (lib)
     filterAttrs
@@ -6,6 +6,12 @@ let
     types
   ;
   appType = import ./lib/appType.nix args;
+
+  mkModuleOption = description: mkOption {
+    type = types.deferredModule;
+    default = { };
+    inherit description;
+  };
 
   hostType = types.submodule ({ name, ... }: {
     options = {
@@ -20,7 +26,13 @@ let
         default = null;
       };
       config = mkOption {
-        type = appType;
+        type = types.submodule {
+          options = {
+            nixpkgs = mkModuleOption "nixpkgs configurations";
+            nixos = mkModuleOption "NixOS configurations";
+            home = mkModuleOption "home-manager configurations";
+          };
+        };
         default = { };
       };
     };

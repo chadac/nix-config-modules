@@ -5,7 +5,10 @@ let
     mkOption
     types
   ;
-  nixpkgsModule = { host, ... }: {
+
+  globalNixPkgsModules = config.modules.nixpkgs;
+
+  rootModule = { host, ... }: {
     _file = __curPos.file;
 
     options = {
@@ -16,39 +19,47 @@ let
         type = types.listOf (types.functionTo (types.functionTo types.pkgs));
         default = [ ];
       };
+      config = mkOption {
+        type = types.submodule {
+          options = {
+            allowUnfree = mkOption { type = types.bool; default = true; };
+            allowUnfreePackages = mkOption { type = types.listOf types.str; default = [ ];};
+            allowUnfreePredicate = mkOption { type = types.functionTo types.bool; };
+          };
+        };
+      };
     };
 
     config = {
-      system = host.system;
+      system = lib.mkDefault host.system;
+      config.allowUnfreePredicate = pkg:
+        builtins.any 
     };
   };
+  hostSubmodule = types.submodule ({ config, ... }: {
+    options._internal = {
+      nixPkgsModules = mkOption { type = types.listOf types.deferredModule; };
+      pkgs = mkOption { type = types.pkgs; };
+    };
+    config._internal = let
+      appModules = map (app: app.nixpkgs) config._internal.apps;
+      host = config;
+      nixParams = lib.evalModules {
+        specialArgs = {
+          inherit host;
+        };
+        modules = host._internal.nixPkgsModules;
+      };
+     in {
+       nixPkgsModules = globalNixPkgsModules ++ appModules ++ [ config.config.nixpkgs ];
+       pkgs = import inputs.nixpkgs nixParams.config;
+     };
+  });
   cfg = config;
-  globalModules = config.modules.nixpkgs;
 in {
   options.hosts = mkOption {
-    type = types.attrsOf (types.submodule ({ config, ... }: {
-      options.pkgs = mkOption {
-        type = types.pkgs;
-      };
-
-      config.pkgs = let
-        host = config // { tags = cfg.defaultTags // config.tags; };
-        appModules = map
-          (app: app.nixpkgs)
-          (builtins.filter
-            (app: app.enablePredicate { inherit host app; })
-            (lib.attrValues cfg.apps));
-        nixParams = lib.evalModules {
-          specialArgs = {
-            inherit host;
-          };
-          modules = builtins.addErrorContext
-            "while evaluating modules for nixpkgs on host '${host.name}'"
-            (globalModules ++ appModules ++ [ host.config.nixpkgs ]);
-        };
-      in import inputs.nixpkgs nixParams.config;
-    }));
+    type = types.attrsOf hostSubmodule;
   };
 
-  config.modules.nixpkgs = [ nixpkgsModule ];
+  config.modules.nixpkgs = [ rootModule ];
 }

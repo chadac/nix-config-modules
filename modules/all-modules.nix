@@ -1,6 +1,6 @@
 [
   ./apps.nix
-  ./flags.nix
+  ./tags.nix
   ./home.nix
   ./hosts.nix
   ./modules.nix

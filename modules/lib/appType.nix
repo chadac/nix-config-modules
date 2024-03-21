@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ lib, ... }:
 let
   inherit (lib)
     attrValues
@@ -6,7 +6,6 @@ let
     mkOption
     types
   ;
-  cfg = config.modules;
 
 in types.submodule {
   _file = __curPos.file;
