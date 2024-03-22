@@ -15,80 +15,82 @@ exercise to the reader to figure out how to use this otherwise.
 
 To start:
 
-    {
-      description = "My Nix system configuration with nix-config-modules";
+```nix
+{
+  description = "My Nix system configuration with nix-config-modules";
 
-      inputs = {
-        nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-        flake-parts.url = "github:hercules-ci/flake-parts";
-        nix-config-modules.url = "github:chadac/nix-config-modules";
-        home-manager = {
-          url = "github:nix-community/home-manager";
-          inputs.nixpkgs.follows = "nixpkgs";
-        };
-        emacs-overlay.url = "github:nix-community/emacs-overlay";
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    nix-config-modules.url = "github:chadac/nix-config-modules";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    emacs-overlay.url = "github:nix-community/emacs-overlay";
+  };
+
+  outputs = { flake-parts, ... }@inputs: flake-parts.lib.mkFlake { inherit inputs; } {
+    # import nix-config-modules
+    imports = [ inputs.nix-config-modules.flakeModule ];
+
+    # this avoids errors when running `nix flake show`
+    systems = [ ];
+
+    nix-config = {
+      # Tags are described below in more detail: You can use these as an
+      # alternative to enabling/disabling applications.
+      defaultTags = {
+        # by default we will not install packages tagged with "development"
+        development = false;
       };
 
-      outputs = { flake-parts, ... }@inputs: flake-parts.lib.mkFlake { inherit inputs; } {
-        # import nix-config-modules
-        imports = [ inputs.nix-config-modules.flakeModule ];
-
-        # this avoids errors when running `nix flake show`
-        systems = [ ];
-
-        nix-config = {
-          # Tags are described below in more detail: You can use these as an
-          # alternative to enabling/disabling applications.
-          defaultTags = {
-            # by default we will not install packages tagged with "development"
-            development = false;
-          };
-
-          # Unlike regular Nix, you can bundle nixpkgs/NixOS/home-manager logic together
-          apps.emacs = {
-            tags = [ "development" ];
-            nixpkgs.params.overlays = [
-              inputs.emacs-overlay.overlay
-            ];
-            nixos = {
-              services.emacs.enable = true;
-            };
-            home = { pkgs, ... }: {
-              programs.emacs = {
-                enable = true;
-                package = pkgs.emacs-unstable;
-              };
-            };
-          };
-
-          hosts.my-first-host = {
-            # host types can be "nixos" and "home-manager"
-            # "nixos" is for systems that build the entirety of Nix
-            kind = "nixos";
-            # defines the system that your host runs on
-            system = "x86_64-linux";
-            # on single user systems you can specify your username straight up.
-            # multi-user support is "upcoming"
-            username = "chadac";
-            # optional metadata... useful for stuff like Git
-            email = "chad@cacrawford.org";
-            # you can customize your home directory, otherwise defaults to
-            # `/home/<username>`
-            homeDirectory = "/home/chadac";
-            tags = {
-              # now we tell Nix that our host needs any apps marked as
-              # 'development'. This enables simplified host configurations
-              # while also empowering users to still fully customize hosts
-              # when needed.
-              development = true;
-              # this is a predifined tag; for apps that are automatically
-              # included and optionally enabled, see <modules/apps>
-              getting-started = true;
-            };
+      # Unlike regular Nix, you can bundle nixpkgs/NixOS/home-manager logic together
+      apps.emacs = {
+        tags = [ "development" ];
+        nixpkgs.params.overlays = [
+          inputs.emacs-overlay.overlay
+        ];
+        nixos = {
+          services.emacs.enable = true;
+        };
+        home = { pkgs, ... }: {
+          programs.emacs = {
+            enable = true;
+            package = pkgs.emacs-unstable;
           };
         };
       };
-    }
+
+      hosts.my-first-host = {
+        # host types can be "nixos" and "home-manager"
+        # "nixos" is for systems that build the entirety of Nix
+        kind = "nixos";
+        # defines the system that your host runs on
+        system = "x86_64-linux";
+        # on single user systems you can specify your username straight up.
+        # multi-user support is "upcoming"
+        username = "chadac";
+        # optional metadata... useful for stuff like Git
+        email = "chad@cacrawford.org";
+        # you can customize your home directory, otherwise defaults to
+        # `/home/<username>`
+        homeDirectory = "/home/chadac";
+        tags = {
+          # now we tell Nix that our host needs any apps marked as
+          # 'development'. This enables simplified host configurations
+          # while also empowering users to still fully customize hosts
+          # when needed.
+          development = true;
+          # this is a predifined tag; for apps that are automatically
+          # included and optionally enabled, see <modules/apps>
+          getting-started = true;
+        };
+      };
+    };
+  };
+}
+```
 
 This will create a basic Flake with some predefined defaults for a
 single-user NixOS system with home-manager enabled. You may then
@@ -127,25 +129,27 @@ into separate files, which can be a bit unreadable.
 In `nix-config-modules`, the configuration for a single application
 happens all in one place -- so you can now do:
 
-    nix-config.apps.thunar = {
-      home = { pkgs, ... }: {
-        home.packages = [ pkgs.xfce.thunar ];
-      };
-      nixos = { pkgs, ... }: {
-        programs.thunar = {
-          enable = true;
-          plugins = with pkgs.xfce; [
-            thunar-archive-plugin
-          ];
-        };
-      };
-      nixpkgs = {
-        packages.unfree = [
-          # just for the example... assume it's unfree
-          "xfce"
-        ];
-      };
-    }
+```nix
+nix-config.apps.thunar = {
+  home = { pkgs, ... }: {
+    home.packages = [ pkgs.xfce.thunar ];
+  };
+  nixos = { pkgs, ... }: {
+    programs.thunar = {
+      enable = true;
+      plugins = with pkgs.xfce; [
+        thunar-archive-plugin
+      ];
+    };
+  };
+  nixpkgs = {
+    packages.unfree = [
+      # just for the example... assume it's unfree
+      "xfce"
+    ];
+  };
+}
+```
 
 No more need to manage configurations for two packages in separate
 places.
@@ -156,20 +160,24 @@ Unlike regular home-manager and NixOS, the types of hosts that I
 manage tend to be fairly similar. The usual approach of customizing
 something like:
 
-    # host 1
-    xsession.windowManager.i3.enable = true;
-    xsession.windowManager.sway.enable = false;
+```nix
+# host 1
+xsession.windowManager.i3.enable = true;
+xsession.windowManager.sway.enable = false;
 
-    # host 2
-    xsession.windowManager.i3.enable = false;
-    xsession.windowManager.sway.enable = true;
+# host 2
+xsession.windowManager.i3.enable = false;
+xsession.windowManager.sway.enable = true;
+```
 
 is pretty annoying when 99% of the time, the rest of the
 configurations will remain the same. To simplify host configuration,
 `nix-config-modules` has a tag-based app management system as
 well. This means that you can use
 
-    my-host.tags.wayland = true;
+```nix
+my-host.tags.wayland = true;
+```
 
 to conditionally configure which apps are deployed to each system.
 
@@ -178,11 +186,13 @@ NOTE: This is an *optional* feature. If `enable` is specified (either
 
 For example, a host can similarly disable `emacs` with:
 
-    hosts.odin = {
-      nix-config = {
-        apps.emacs.enable = false;
-      };
-    };
+```nix
+hosts.odin = {
+  nix-config = {
+    apps.emacs.enable = false;
+  };
+};
+```
 
 ## Usage
 
@@ -191,71 +201,83 @@ For example, a host can similarly disable `emacs` with:
 Apps are basic configurations that combine NixOS, home-manager and
 nixpkgs configurations. A basic example might be:
 
-    nix-config.apps.i3 = {
-      tags = [ "desktop" ];
-      nixos = {
-        services.xserver = {
-          displayManager.defaultSession = "none+i3";
-          windowManager.i3.enable = true;
-        };
-      };
-      home = { pkgs, ... }: {
-        xsession.windowManager.i3.enable = true;
-        home.packages = with pkgs; [ dmenu i3status ];
-      };
+```nix
+nix-config.apps.i3 = {
+  tags = [ "desktop" ];
+  nixos = {
+    services.xserver = {
+      displayManager.defaultSession = "none+i3";
+      windowManager.i3.enable = true;
     };
+  };
+  home = { pkgs, ... }: {
+    xsession.windowManager.i3.enable = true;
+    home.packages = with pkgs; [ dmenu i3status ];
+  };
+};
+```
 
 You may also use this to customize the import of `nixpkgs`; for
 example:
 
-    { inputs, ... }:
-    nix-config.apps.emacs = {
-      tags = [ "development" ];
-      home = <...>;
-      nixpkgs = {
-        overlays = [ inputs.emacs-overlay.overlays.default ];
-      }
-    };
+```nix
+{ inputs, ... }:
+nix-config.apps.emacs = {
+  tags = [ "development" ];
+  home = <...>;
+  nixpkgs = {
+    overlays = [ inputs.emacs-overlay.overlays.default ];
+  }
+};
+```
 
 And of course, host tags may not only customize the enabling/disabling
 of apps but also their configuration:
 
-    nixpkgs = { lib, host, ... }: {
-      overlays = lib.mkIf host.tags.bleeding-edge [ inputs.emacs-overlay.overlays.default ];
-    };
+```nix
+nixpkgs = { lib, host, ... }: {
+  overlays = lib.mkIf host.tags.bleeding-edge [ inputs.emacs-overlay.overlays.default ];
+};
+```
 
 ### Fast apps
 
 Sometimes we'd like to have some apps automatically installed to our
 user's system. For that, use the trait `homeApps`:
 
-    homeApps = [{
-      tags = [ "entertainment" ];
-      packages = [ "vlc" "spotify" "tidal-hifi" ];
-    }]
+```nix
+homeApps = [{
+  tags = [ "entertainment" ];
+  packages = [ "vlc" "spotify" "tidal-hifi" ];
+}]
+```
 
 This creates the following equivalent configuration:
 
-    apps.vlc = {
-      tags = [ "entertainment" ];
-      home = { pkgs, ... }: {
-        home.packages = [ pkgs.vlc ];
-      };
-    };
+```nix
+apps.vlc = {
+  tags = [ "entertainment" ];
+  home = { pkgs, ... }: {
+    home.packages = [ pkgs.vlc ];
+  };
+};
 
-    < .. repeat for spotify, tidal-hifi .. >
+# < .. repeat for spotify, tidal-hifi .. >
+```
 
 ### Per-host configuration
 
 It's also possible to manage NixOS/Home Manager/nixpkgs configurations
 on a per-host basis:
 
-    nix-config.hosts.my-first-host = {
-      <...>
-      nixos = {
-        imports = [ ./my-first-host/hardware-configuration.nix ];
-      };
-    };
+```nix
+nix-config.hosts.my-first-host = {
+  # <...>
+  nixos = {
+    imports = [ ./my-first-host/hardware-configuration.nix ];
+  };
+};
+```
 
 ## FAQ
 
