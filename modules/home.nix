@@ -1,6 +1,7 @@
 { config, lib, inputs, ... }:
 let
   inherit (lib)
+    filterAttrs
     mapAttrs
     mkOption
     types
@@ -22,6 +23,8 @@ let
       ++ (map (app: app.home) config._internal.apps)
       ++ [ config.home ];
   });
+
+  homeHosts = filterAttrs (_: host: host.kind == "home-manager") config.hosts;
 in {
   options = {
     hosts = mkOption {
@@ -49,7 +52,7 @@ in {
             "while importing home-manager definitions"
             host._internal.homeModules;
         })
-      config.hosts
+      homeHosts
     ;
   };
 }

@@ -1,6 +1,7 @@
 { config, lib, inputs, ... }:
 let
   inherit (lib)
+    filterAttrs
     mapAttrs
     mkOption
     types
@@ -22,6 +23,8 @@ let
       ++ (map (app: app.nixos) config._internal.apps)
       ++ [ config.nixos ];
   });
+
+  nixosHosts = filterAttrs (_: host: host.kind == "nixos") config.hosts;
 in {
   options = {
     hosts = mkOption { type = types.attrsOf hostSubmodule; };
@@ -42,6 +45,6 @@ in {
         }
       ];
     })
-    config.hosts
+    nixosHosts
   ;
 }

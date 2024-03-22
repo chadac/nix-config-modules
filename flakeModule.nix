@@ -16,12 +16,8 @@ in {
 
     nix-config = mkOption {
       type = types.submoduleWith {
-        # prefix = "nix-config";
-        # specialArgs = { inherit inputs; };
         modules = (import ./modules/all-modules.nix) ++ [
-          {
-            _module.args.inputs = inputs;
-          }
+          { _module.args.inputs = inputs; }
         ];
       };
     };
@@ -30,7 +26,7 @@ in {
   config = {
     flake = {
       homeConfigurations = config.nix-config.homeConfigurations;
-      nixosConfigurations = config.nix-config.nixosConfigurations;
+      nixosConfigurations =  config.nix-config.nixosConfigurations;
     };
   };
 }
