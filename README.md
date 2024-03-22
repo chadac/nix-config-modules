@@ -62,7 +62,7 @@ A sample config may look like:
         };
       };
 
-      hosts.my-first-host = {
+      hosts.my-host = {
         # host types can be "nixos" and "home-manager"
         # "nixos" is for systems that build the entirety of Nix
         kind = "nixos";
@@ -96,7 +96,11 @@ This will create a basic Flake with some predefined defaults for a
 single-user NixOS system with home-manager enabled. You may then
 build/switch to the system using:
 
-    nixos-rebuild switch --flake .#my-first-host
+    nixos-rebuild switch --flake .#my-host
+
+Or with home-manager:
+
+    home-manager switch --flake .#my-host
 
 Since this is layered with `flake-parts` you may then choose to
 manage/deploy your hosts however you wish.
@@ -330,10 +334,10 @@ It's also possible to manage NixOS/Home Manager/nixpkgs configurations
 on a per-host basis:
 
 ```nix
-nix-config.hosts.my-first-host = {
+nix-config.hosts.my-host = {
   # <...>
   nixos = {
-    imports = [ ./my-first-host/hardware-configuration.nix ];
+    imports = [ ./my-host/hardware-configuration.nix ];
   };
 };
 ```
