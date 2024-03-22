@@ -221,14 +221,15 @@ You may also use this to customize the import of `nixpkgs`; for
 example:
 
 ```nix
-{ inputs, ... }:
-nix-config.apps.emacs = {
-  tags = [ "development" ];
-  home = <...>;
-  nixpkgs = {
-    overlays = [ inputs.emacs-overlay.overlays.default ];
-  }
-};
+{ inputs, ... }: {
+  nix-config.apps.emacs = {
+    tags = [ "development" ];
+    home = <...>;
+    nixpkgs = {
+      overlays = [ inputs.emacs-overlay.overlays.default ];
+    }
+  };
+}
 ```
 
 And of course, host tags may not only customize the enabling/disabling
