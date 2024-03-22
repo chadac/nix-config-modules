@@ -289,7 +289,9 @@ meh
 
 Technically you can disable home-manager with
 
-    nix-config.defaultTags.home-manager = lib.mkForce false;
+```nix
+nix-config.defaultTags.home-manager = lib.mkForce false;
+```
 
 That'll remove any NixOS integrations to make HM work.
 
