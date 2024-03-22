@@ -17,8 +17,12 @@ in {
     nix-config = mkOption {
       type = types.submoduleWith {
         # prefix = "nix-config";
-        specialArgs = { inherit inputs; };
-        modules = import ./modules/all-modules.nix;
+        # specialArgs = { inherit inputs; };
+        modules = (import ./modules/all-modules.nix) ++ [
+          {
+            _module.args.inputs = inputs;
+          }
+        ];
       };
     };
   };

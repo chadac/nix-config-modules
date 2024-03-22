@@ -8,11 +8,19 @@ let
   globalHomeModules = config.modules.home-manager;
 
   hostSubmodule = types.submodule ({ config, ... }: {
-    options._internal.homeModules = mkOption { type = types.listOf types.deferredModule; };
+    options._internal.homeModules = mkOption {
+      type = types.listOf types.deferredModule;
+      description = ''
+        Internal list of home-manager modules passed to the host.
+
+        Don't override this unless you absolutely know what you're doing. Prefer
+        using `host.<name>.home` instead.
+      '';
+    };
     config._internal.homeModules =
       globalHomeModules
       ++ (map (app: app.home) config._internal.apps)
-      ++ [ config.config.home ];
+      ++ [ config.home ];
   });
 in {
   options = {

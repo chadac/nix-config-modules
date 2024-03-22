@@ -8,11 +8,19 @@ let
   globalNixosModules = config.modules.nixos;
 
   hostSubmodule = types.submodule ({ config, ... }: {
-    options._internal.nixosModules = mkOption { type = types.listOf types.deferredModule; };
+    options._internal.nixosModules = mkOption {
+      type = types.listOf types.deferredModule;
+      description = ''
+        List of NixOS modules used by the host.
+
+        Don't override this unless you absolutely know what you're doing. Prefer
+        using `host.<name>.nixos` instead.
+      '';
+    };
     config._internal.nixosModules =
       globalNixosModules
       ++ (map (app: app.nixos) config._internal.apps)
-      ++ [ config.config.nixos ];
+      ++ [ config.nixos ];
   });
 in {
   options = {
@@ -20,15 +28,20 @@ in {
     nixosConfigurations = mkOption {
       type = types.lazyAttrsOf types.raw;
       default = { };
+      description = ''
+        Exported NixOS configurations, which can be used in your flake.
+      '';
     };
   };
-  config.nixosConfigurations = builtins.trace config.hosts (mapAttrs
+  config.nixosConfigurations = mapAttrs
     (_: host: inputs.nixpkgs.lib.nixosSystem {
-      specialArgs = {
-        inherit host;
-      };
-      modules = host._internal.nixosModules;
+      modules = host._internal.nixosModules ++ [
+        {
+          _module.args.host = host;
+          nixpkgs.pkgs = host._internal.pkgs;
+        }
+      ];
     })
     config.hosts
-  );
+  ;
 }

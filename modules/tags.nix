@@ -24,6 +24,12 @@ in {
     };
     defaultTags = mkOption {
       type = types.attrsOf types.bool;
+      description = lib.mdDoc ''
+        The default values for each tag used by the hosts.
+
+        Note that for a host to specify a tag, an intial value must be
+        specified in `defaultTags`.
+      '';
     };
   };
 }

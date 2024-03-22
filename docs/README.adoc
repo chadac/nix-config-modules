@@ -1,0 +1,810 @@
+== _module{zwsp}.args
+
+Additional arguments passed to each module in addition to ones like ``lib``, ``config``, and ``pkgs``, ``modulesPath``{zwsp}.
+
+This option is also available to all submodules{zwsp}. Submodules do not inherit args from their parent module, nor do they provide args to their parent module or sibling submodules{zwsp}. The sole exception to this is the argument ``name`` which is provided by parent modules to a submodule and contains the attribute name the submodule is bound to, or a unique generated name if it is not bound to an attribute{zwsp}.
+
+Some arguments are already passed by default, of which the following __cannot__ be changed with this option:
+
+[]
+* {empty}[.var]``lib``: The nixpkgs library{zwsp}.
+
+* {empty}[.var]``config``: The results of all options after merging the values from all modules together{zwsp}.
+
+* {empty}[.var]``options``: The options declared in all modules{zwsp}.
+
+* {empty}[.var]``specialArgs``: The ``specialArgs`` argument passed to ``evalModules``{zwsp}.
+
+* {empty}All attributes of [.var]``specialArgs``
++
+Whereas option values can generally depend on other option values thanks to laziness, this does not apply to ``imports``, which must be computed statically before anything else{zwsp}.
++
+For this reason, callers of the module system can provide ``specialArgs`` which are available during import resolution{zwsp}.
++
+For NixOS, ``specialArgs`` includes [.var]``modulesPath``, which allows you to import extra modules from the nixpkgs package tree without having to somehow make the module aware of the location of the ``nixpkgs`` or NixOS directories{zwsp}.
++
+----
+{ modulesPath, ... }: {
+  imports = [
+    (modulesPath + "/profiles/minimal.nix")
+  ];
+}
+----
+
+
+For NixOS, the default value for this option includes at least this argument:
+
+[options="compact"]
+* {empty}[.var]``pkgs``: The nixpkgs package set according to the [.option]``nixpkgs{zwsp}.pkgs`` option{zwsp}.
+
+
+
+
+__Type:__ lazy attribute set of raw value
+
+__Declared by:__
+
+* link:https://github.com/NixOS/nixpkgs/blob//lib/modules.nix[{zwsp}+<+{zwsp}nixpkgs/lib/modules{zwsp}.nix{gt}]
+
+
+
+== apps
+
+
+
+An app is an individual module that defines collective configurations for generally a single application across NixOS/home-manager/nixpkgs{zwsp}. Each host defines the __set__ of apps that it wishes to initialize{zwsp}.
+
+
+
+__Type:__ lazy attribute set of (submodule)
+
+
+
+__Default:__ ``{ }``
+
+
+
+__Example:__
+
+----
+''
+  apps.emacs = {
+    tags = [ "development" ];
+    nixos = {
+      services.emacs.enable = true;
+    };
+    home = { pkgs, ... }: {
+      programs.emacs = {
+        enable = true;
+        package = pkgs.emacsUnstable;
+      };
+    };
+    nixpkgs.overlays = [ inputs.emacs-overlay.overlay ];
+  };
+''
+----
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/apps.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/apps{zwsp}.nix]
+
+
+
+== apps{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.enable
+
+
+
+If set, enables or disables the given app{zwsp}. This overrides tag behavior{zwsp}.
+
+
+
+__Type:__ null or boolean
+
+
+
+__Default:__ ``null``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/lib/appType.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/lib/appType{zwsp}.nix]
+
+
+
+== apps{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.enablePredicate
+
+
+
+Predicate used to determine if the given app should be enabled on the given host{zwsp}.
+
+It’s recommended not to override this function, as its default behavior incorporates forceEnable, tags and disableTags{zwsp}.
+
+
+
+__Type:__ function that evaluates to a(n) boolean
+
+
+
+__Default:__ ``{zwsp}+<+{zwsp}function, args: {app, host}{gt}``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/lib/appType.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/lib/appType{zwsp}.nix]
+
+
+
+== apps{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.disableTags
+
+
+
+List of tags that will disable the
+
+
+
+__Type:__ list of string
+
+
+
+__Default:__ ``{startsb} {endsb}``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/lib/appType.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/lib/appType{zwsp}.nix]
+
+
+
+== apps{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.home
+
+
+
+``home-manager`` configurations{zwsp}. See the link:https://nix-community.github.io/home-manager/[home-manager manual] for more information{zwsp}.
+
+
+
+__Type:__ module
+
+
+
+__Default:__ ``{ }``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/lib/appType.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/lib/appType{zwsp}.nix]
+
+
+
+== apps{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.nixos
+
+
+
+NixOS configurations{zwsp}. See the link:https://nixos.org/manual/nixos/stable/%23ch-configuration[NixOS manual] for more information{zwsp}.
+
+
+
+__Type:__ module
+
+
+
+__Default:__ ``{ }``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/lib/appType.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/lib/appType{zwsp}.nix]
+
+
+
+== apps{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.nixpkgs
+
+
+
+Nixpkgs configurations{zwsp}. See ``{zwsp}./modules/nixpkgs{zwsp}.nix`` for more details{zwsp}.
+
+
+
+__Type:__ module
+
+
+
+__Default:__ ``{ }``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/lib/appType.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/lib/appType{zwsp}.nix]
+
+
+
+== apps{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.tags
+
+
+
+List of tags that, when supplied, will enable the given app on the given host{zwsp}.
+
+
+
+__Type:__ list of string
+
+
+
+__Default:__ ``{startsb} {endsb}``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/lib/appType.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/lib/appType{zwsp}.nix]
+
+
+
+== defaultTags
+
+
+
+The default values for each tag used by the hosts{zwsp}.
+
+Note that for a host to specify a tag, an intial value must be specified in ``defaultTags``{zwsp}.
+
+
+
+__Type:__ attribute set of boolean
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/tags.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/tags{zwsp}.nix]
+
+
+
+== homeApps
+
+
+
+A helper for instantiating applications that only add a package to ``home{zwsp}.packages``{zwsp}. This generates a single application per package, so for example:
+
+----
+homeApps = [{ packages = ["emacs"]; }];
+----
+
+is equivalent to:
+
+----
+apps.emacs = {
+  home = { pkgs, ... }: {
+    home.packages = [ pkgs.emacs ];
+  };
+};
+----
+
+
+
+__Type:__ list of (submodule)
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/home-apps.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/home-apps{zwsp}.nix]
+
+
+
+== homeApps{zwsp}.{asterisk}{zwsp}.enable
+
+
+
+App attribute passed to all generated applications{zwsp}.
+
+
+
+__Type:__ null or boolean
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/home-apps.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/home-apps{zwsp}.nix]
+
+
+
+== homeApps{zwsp}.{asterisk}{zwsp}.packages
+
+
+
+This list of ``nixpkgs`` package names to generate applications for{zwsp}.
+
+
+
+__Type:__ list of string
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/home-apps.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/home-apps{zwsp}.nix]
+
+
+
+== homeApps{zwsp}.{asterisk}{zwsp}.disableTags
+
+
+
+App attribute passed to all generated applications{zwsp}.
+
+
+
+__Type:__ list of string
+
+
+
+__Default:__ ``{startsb} {endsb}``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/home-apps.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/home-apps{zwsp}.nix]
+
+
+
+== homeApps{zwsp}.{asterisk}{zwsp}.tags
+
+
+
+App attribute passed to all generated applications{zwsp}.
+
+
+
+__Type:__ list of string
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/home-apps.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/home-apps{zwsp}.nix]
+
+
+
+== homeConfigurations
+
+
+
+Home configurations{zwsp}. Instantiated by home-manager build{zwsp}.
+
+
+
+__Type:__ lazy attribute set of raw value
+
+
+
+__Default:__ ``{ }``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/home.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/home{zwsp}.nix]
+
+
+
+== hosts
+
+
+
+Individual NixOS/home-manager configurations for individual machines or classes of machines{zwsp}.
+
+Each host initializes a separate copy of ``nixpkgs`` and has its own initialization of ``nixosConfigurations`` and ``homeConfigurations`` depending on its type{zwsp}.
+
+
+
+__Type:__ attribute set of (submodule)
+
+
+
+__Default:__ ``{ }``
+
+
+
+__Example:__
+
+----
+''
+  hosts.odin = {
+    # specifies that this builds the entire NixOS
+    kind = "nixos";
+    # specifies the system to build for
+    system = "x86_64-linux";
+  };
+''
+----
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/apps/single-user.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/apps/single-user{zwsp}.nix]
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/nixpkgs.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/nixpkgs{zwsp}.nix]
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/nixos.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/nixos{zwsp}.nix]
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/hosts.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/hosts{zwsp}.nix]
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/home.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/home{zwsp}.nix]
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/tags.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/tags{zwsp}.nix]
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/apps.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/apps{zwsp}.nix]
+
+
+
+== hosts{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}._internal{zwsp}.apps
+
+
+
+The list of apps enabled for this host, containing deferred modules for initializing later module systems{zwsp}. This is used internally to track per-host app configurations, since each host will enable its own set of apps{zwsp}.
+
+Do not specify or override this attribute unless you know what you’re doing! Use ``host{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.nix-config`` instead{zwsp}.
+
+
+
+__Type:__ list of raw value
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/apps.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/apps{zwsp}.nix]
+
+
+
+== hosts{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}._internal{zwsp}.homeModules
+
+
+
+Internal list of home-manager modules passed to the host{zwsp}.
+
+Don’t override this unless you absolutely know what you’re doing{zwsp}. Prefer using ``host{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.home`` instead{zwsp}.
+
+
+
+__Type:__ list of module
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/home.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/home{zwsp}.nix]
+
+
+
+== hosts{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}._internal{zwsp}.nixPkgsModules
+
+
+
+List of nixpkgs modules used to instantiate the host{zwsp}.
+
+Don’t override this unless you absolutely know what you’re doing{zwsp}. Prefer using ``host{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.nixpkgs`` instead{zwsp}.
+
+
+
+__Type:__ list of module
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/nixpkgs.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/nixpkgs{zwsp}.nix]
+
+
+
+== hosts{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}._internal{zwsp}.nixosModules
+
+
+
+List of NixOS modules used by the host{zwsp}.
+
+Don’t override this unless you absolutely know what you’re doing{zwsp}. Prefer using ``host{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.nixos`` instead{zwsp}.
+
+
+
+__Type:__ list of module
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/nixos.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/nixos{zwsp}.nix]
+
+
+
+== hosts{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}._internal{zwsp}.pkgs
+
+
+
+The import of ``nixpkgs`` used by this host{zwsp}.
+
+Generally you shouldn’t override this, and instead customize ``nixpkgs`` using ``host{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.nixpkgs`` instead{zwsp}.
+
+
+
+__Type:__ Nixpkgs package set
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/nixpkgs.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/nixpkgs{zwsp}.nix]
+
+
+
+== hosts{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.email
+
+
+
+The email for the single user{zwsp}.
+
+
+
+__Type:__ string
+
+
+
+__Default:__ ``{quot}{quot}``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/apps/single-user.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/apps/single-user{zwsp}.nix]
+
+
+
+== hosts{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.home
+
+
+
+home-manager configurations
+
+
+
+__Type:__ module
+
+
+
+__Default:__ ``{ }``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/hosts.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/hosts{zwsp}.nix]
+
+
+
+== hosts{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.homeDirectory
+
+
+
+The path to the home directory for this user{zwsp}. Defaults to ``/home/{zwsp}+<+{zwsp}username{gt}``
+
+
+
+__Type:__ path
+
+
+
+__Default:__ ``{quot}/home/user{quot}``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/apps/single-user.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/apps/single-user{zwsp}.nix]
+
+
+
+== hosts{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.kind
+
+
+
+The type of host this is{zwsp}. Two options:
+
+[options="compact"]
+* {empty}``nixos``: A NixOS system configuration{zwsp}. Generates NixOS with home-manager installed{zwsp}.
+
+* {empty}``home-manager``: A home-manager configuration{zwsp}. Generates only the home-manager configuration for the host{zwsp}.
+
+
+
+
+__Type:__ one of “nixos”, “home-manager”
+
+
+
+__Default:__ ``{quot}nixos{quot}``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/hosts.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/hosts{zwsp}.nix]
+
+
+
+== hosts{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.name
+
+
+
+The name of the host, as specified in the attribute set{zwsp}. Use this to target per-host behavior{zwsp}. Generally you should not set this yourself; it will be set automatically when you define the host{zwsp}.
+
+
+
+__Type:__ string
+
+
+
+__Default:__ ``{quot}{quot}``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/hosts.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/hosts{zwsp}.nix]
+
+
+
+== hosts{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.nix-config
+
+
+
+additional configurations for nix-config-modules{zwsp}.
+
+Use this to add additional custom apps or customize apps on a per-host basis{zwsp}.
+
+
+
+__Type:__ module
+
+
+
+__Default:__ ``{ }``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/hosts.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/hosts{zwsp}.nix]
+
+
+
+== hosts{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.nixos
+
+
+
+NixOS configurations
+
+
+
+__Type:__ module
+
+
+
+__Default:__ ``{ }``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/hosts.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/hosts{zwsp}.nix]
+
+
+
+== hosts{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.nixpkgs
+
+
+
+nixpkgs configurations
+
+
+
+__Type:__ module
+
+
+
+__Default:__ ``{ }``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/hosts.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/hosts{zwsp}.nix]
+
+
+
+== hosts{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.system
+
+
+
+The system that this host runs on{zwsp}. This is used to initialize ``nixpkgs``{zwsp}.
+
+
+
+__Type:__ string
+
+
+
+__Default:__ ``null``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/hosts.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/hosts{zwsp}.nix]
+
+
+
+== hosts{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.tags
+
+
+
+Boolean tags to indicate whether certain features should be enabled or disabled{zwsp}.
+
+
+
+__Type:__ attribute set of boolean
+
+
+
+__Default:__ ``{ }``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/tags.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/tags{zwsp}.nix]
+
+
+
+== hosts{zwsp}.{zwsp}+<+{zwsp}name{gt}{zwsp}.username
+
+
+
+The username of the single user for this system{zwsp}.
+
+
+
+__Type:__ string
+
+
+
+__Default:__ ``{quot}user{quot}``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/apps/single-user.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/apps/single-user{zwsp}.nix]
+
+
+
+== modules{zwsp}.home-manager
+
+
+
+Additional global modules to add to each Home Manager configuration{zwsp}. Useful for extending Home Manager in the standard fashion{zwsp}.
+
+
+
+__Type:__ list of module
+
+
+
+__Default:__ ``{startsb} {endsb}``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/modules.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/modules{zwsp}.nix]
+
+
+
+== modules{zwsp}.nixos
+
+
+
+Additional global modules to add to each NixOS configuration{zwsp}. Useful for extending NixOS in the standard fashion{zwsp}.
+
+
+
+__Type:__ list of module
+
+
+
+__Default:__ ``{startsb} {endsb}``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/modules.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/modules{zwsp}.nix]
+
+
+
+== modules{zwsp}.nixpkgs
+
+
+
+Additional global modules to add to each nixpkgs instantiation{zwsp}. Useful if we missed some option for configuring ``nixpkgs``, which is bound to happen cause that shit’s distributed everywhere{zwsp}.
+
+
+
+__Type:__ list of module
+
+
+
+__Default:__ ``{startsb} {endsb}``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/modules.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/modules{zwsp}.nix]
+
+
+
+== nixosConfigurations
+
+
+
+Exported NixOS configurations, which can be used in your flake{zwsp}.
+
+
+
+__Type:__ lazy attribute set of raw value
+
+
+
+__Default:__ ``{ }``
+
+__Declared by:__
+
+* link:file:///nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/nixos.nix[/nix/store/pi1i9j37cm8gj4zqy1n21fmw2whsh0ff-source/modules/nixos{zwsp}.nix]
+
+

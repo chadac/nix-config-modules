@@ -74,6 +74,9 @@ well. This means that you can use
 
 to conditionally configure which apps are deployed to each system.
 
+NOTE: This is an *optional* feature. If `enable` is specified (either
+`enable = true` or `enable = false`), then that overrides tag behavior.
+
 ## Usage
 
 This uses [flake-parts](https://flake.parts). You don't have to (and I
@@ -160,6 +163,27 @@ of apps but also their configuration:
       overlays = lib.mkIf host.tags.bleeding-edge [ inputs.emacs-overlay.overlays.default ];
     };
 
+### Fast apps
+
+Sometimes we'd like to have some apps automatically installed to our
+user's system. For that, use the trait `homeApps`:
+
+    homeApps = [{
+      tags = [ "entertainment" ];
+      packages = [ "vlc" "spotify" "tidal-hifi" ];
+    }]
+
+This creates the following equivalent configuration:
+
+    apps.vlc = {
+      tags = [ "entertainment" ];
+      home = { pkgs, ... }: {
+        home.packages = [ pkgs.vlc ];
+      };
+    };
+
+    < .. repeat for spotify, tidal-hifi .. >
+
 ### Per-host configuration
 
 It's also possible to manage NixOS/Home Manager/nixpkgs configurations
@@ -167,7 +191,7 @@ on a per-host basis:
 
     nix-config.hosts.my-first-host = {
       <...>
-      config.nixos = {
+      nixos = {
         imports = [ ./my-first-host/hardware-configuration.nix ];
       };
     };
@@ -182,7 +206,7 @@ meh
 
 Technically you can disable home-manager with
 
-    nix-config.defaultTags.home-manager = false;
+    nix-config.defaultTags.home-manager = lib.mkForce false;
 
 That'll remove any NixOS integrations to make HM work.
 
@@ -194,6 +218,14 @@ yeah I know
 
 yeah I know
 
-### you're needlessly doing this deferred modules thing and you could simplify this
+### your documentation sucks
+
+yeah I know
+
+### your testing sucks
+
+yeah I know
+
+### you're needlessly doing deferred modules and you could simplify this
 
 ok I didn't know that
