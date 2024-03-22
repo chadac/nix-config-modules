@@ -99,6 +99,9 @@ build/switch to the system using:
 Since this is layered with `flake-parts` you may then choose to
 manage/deploy your hosts however you wish.
 
+For a more in-depth example of how this can be used, see
+[github:chadac/dotfiles](https://github.com/chadac/dotfiles).
+
 ## Why?
 
 This is primarily an example in making it really easy to build flakes
