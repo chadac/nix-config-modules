@@ -64,7 +64,8 @@ A sample config may look like:
 
       hosts.my-host = {
         # host types can be "nixos" and "home-manager"
-        # "nixos" is for systems that build the entirety of Nix
+        # "nixos" is for systems that build NixOS; home-manager is bundled with it
+        # "home-manager" is for systems that install just HM (for example, darwin etc)
         kind = "nixos";
         # defines the system that your host runs on
         system = "x86_64-linux";
