@@ -1,3 +1,6 @@
+# We need some home-manager integrations for users on NixOS
+# systems. This is optionally enabled when you want to use
+# home-manger.
 { inputs, ... }:
 {
   config = {
@@ -5,21 +8,7 @@
       enablePredicate = { host, ... }:
         host.tags.home-manager && host.tags.single-user;
 
-      nixos = { host, ... }: let
-        # homeModule = inputs.home-manager.nixosModules.home-manager {
-        #   _file = __curPos.file;
-        #   home-manager = {
-        #     useGlobalPkgs = true;
-        #     useUserPackages = true;
-        #     extraSpecialArgs = {
-        #       inherit host;
-        #     };
-        #     users.${host.username} = {
-        #       imports = host._internal.homeModules;
-        #     };
-        #   };
-        # };
-      in {
+      nixos = { host, ... }: {
         imports = [
           inputs.home-manager.nixosModules.home-manager
         ];

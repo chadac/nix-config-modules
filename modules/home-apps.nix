@@ -15,6 +15,7 @@ let
         description = ''
           App attribute passed to all generated applications.
         '';
+        default = null;
       };
       tags = mkOption {
         type = types.listOf types.str;

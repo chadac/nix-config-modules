@@ -1,7 +1,11 @@
 # nix-config-modules
 
 Modules to combine your NixOS, home-manager and nixpkgs
-configurations.
+configurations. This provides a means for people to get started with
+configuring flake-based Nix configs without needing to dive deep into
+understanding how Flakes work while also providing power users with
+options to configure multiple hosts in a simple and maximally
+configurable manner.
 
 ## Getting started
 
@@ -17,36 +21,69 @@ To start:
       inputs = {
         nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
         flake-parts.url = "github:hercules-ci/flake-parts";
-        nix-config-modules.url = "path:/home/chadac/code/github.com/chadac/nix-config-modules";
+        nix-config-modules.url = "github:chadac/nix-config-modules";
         home-manager = {
           url = "github:nix-community/home-manager";
           inputs.nixpkgs.follows = "nixpkgs";
         };
+        emacs-overlay.url = "github:nix-community/emacs-overlay";
       };
 
       outputs = { flake-parts, ... }@inputs: flake-parts.lib.mkFlake { inherit inputs; } {
+        # import nix-config-modules
         imports = [ inputs.nix-config-modules.flakeModule ];
+
         # this avoids errors when running `nix flake show`
         systems = [ ];
 
         nix-config = {
-          hosts.my-first-host = {
-            kind = "nixos";
-            system = "x86_64-linux";
-            username = "chadac";
-            email = "chad@cacrawford.org";
-            homeDirectory = "/home/chadac";
-            tags = {
-              getting-started = true;
-            };
-          };
+          # Tags are described below in more detail: You can use these as an
+          # alternative to enabling/disabling applications.
           defaultTags = {
-            development = true;
+            # by default we will not install packages tagged with "development"
+            development = false;
           };
+
+          # Unlike regular Nix, you can bundle nixpkgs/NixOS/home-manager logic together
           apps.emacs = {
             tags = [ "development" ];
-            home = {
-              programs.emacs.enable = true;
+            nixpkgs.params.overlays = [
+              inputs.emacs-overlay.overlay
+            ];
+            nixos = {
+              services.emacs.enable = true;
+            };
+            home = { pkgs, ... }: {
+              programs.emacs = {
+                enable = true;
+                package = pkgs.emacs-unstable;
+              };
+            };
+          };
+
+          hosts.my-first-host = {
+            # host types can be "nixos" and "home-manager"
+            # "nixos" is for systems that build the entirety of Nix
+            kind = "nixos";
+            # defines the system that your host runs on
+            system = "x86_64-linux";
+            # on single user systems you can specify your username straight up.
+            # multi-user support is "upcoming"
+            username = "chadac";
+            # optional metadata... useful for stuff like Git
+            email = "chad@cacrawford.org";
+            # you can customize your home directory, otherwise defaults to
+            # `/home/<username>`
+            homeDirectory = "/home/chadac";
+            tags = {
+              # now we tell Nix that our host needs any apps marked as
+              # 'development'. This enables simplified host configurations
+              # while also empowering users to still fully customize hosts
+              # when needed.
+              development = true;
+              # this is a predifined tag; for apps that are automatically
+              # included and optionally enabled, see <modules/apps>
+              getting-started = true;
             };
           };
         };
@@ -100,7 +137,7 @@ happens all in one place -- so you can now do:
         };
       };
       nixpkgs = {
-        config.allowUnfreePackages = [
+        packages.unfree = [
           # just for the example... assume it's unfree
           "xfce"
         ];
@@ -135,6 +172,14 @@ to conditionally configure which apps are deployed to each system.
 
 NOTE: This is an *optional* feature. If `enable` is specified (either
 `enable = true` or `enable = false`), then that overrides tag behavior.
+
+For example, a host can similarly disable `emacs` with:
+
+    hosts.odin = {
+      nix-config = {
+        apps.emacs.enable = false;
+      };
+    };
 
 ## Usage
 

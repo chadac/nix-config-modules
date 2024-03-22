@@ -1,3 +1,7 @@
+# I don't want to force anybody to use single-user configs, so it's
+# possible to enable or disable this with tags. In the future I may
+# specify a separate module for multi-user configurations.
+
 { lib, ... }: let
   inherit (lib)
     mkOption
