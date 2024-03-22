@@ -115,20 +115,29 @@ To import existing configurations to a **single host**:
 
 ```nix
   outputs = { flake-parts, ... }@inputs: flake-parts.lib.mkFlake { inherit inputs; } {
-    # import nix-config-modules
     imports = [ inputs.nix-config-modules.flakeModule ];
 
-    # this avoids errors when running `nix flake show`
     systems = [ ];
 
     nix-config = {
       hosts.my-host = {
-        # <...>
+        kind = "...";
+        system = "...";
+
+        # each host can specify custom nixos/home/nixpkgs attributes to customize
+        # their own configuration
         nixos = {
           imports = [ ./configuration.nix ];
         };
         home = {
           imports = [ ./home.nix ];
+        };
+        # OPTIONAL: you can disable any apps that automatically add configurations.
+        # See <modules/apps> for details on what each of these do.
+        defaultTags = {
+          defaults = false;
+          single-user = false;
+          home-manager = false;
         };
       };
     };
@@ -138,7 +147,6 @@ To import existing configurations **globally**:
 
 ```nix
   outputs = { flake-parts, ... }@inputs: flake-parts.lib.mkFlake { inherit inputs; } {
-    # import nix-config-modules
     imports = [ inputs.nix-config-modules.flakeModule ];
     systems = [ ];
     nix-config = {
@@ -148,6 +156,8 @@ To import existing configurations **globally**:
       };
       hosts.my-host = {
         # you will still need to specify `system` and `kind`
+        kind = "...";
+        system = "...";
       };
     };
 ```
