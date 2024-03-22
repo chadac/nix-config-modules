@@ -3,6 +3,65 @@
 Modules to combine your NixOS, home-manager and nixpkgs
 configurations.
 
+## Getting started
+
+This uses [flake-parts](https://flake.parts). You don't have to (and I
+built it without any explicit dependencies on it) but I leave it as an
+exercise to the reader to figure out how to use this otherwise.
+
+To start:
+
+    {
+      description = "My Nix system configuration with nix-config-modules";
+
+      inputs = {
+        nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+        flake-parts.url = "github:hercules-ci/flake-parts";
+        nix-config-modules.url = "path:/home/chadac/code/github.com/chadac/nix-config-modules";
+        home-manager = {
+          url = "github:nix-community/home-manager";
+          inputs.nixpkgs.follows = "nixpkgs";
+        };
+      };
+
+      outputs = { flake-parts, ... }@inputs: flake-parts.lib.mkFlake { inherit inputs; } {
+        imports = [ inputs.nix-config-modules.flakeModule ];
+        # this avoids errors when running `nix flake show`
+        systems = [ ];
+
+        nix-config = {
+          hosts.my-first-host = {
+            kind = "nixos";
+            system = "x86_64-linux";
+            username = "chadac";
+            email = "chad@cacrawford.org";
+            homeDirectory = "/home/chadac";
+            tags = {
+              getting-started = true;
+            };
+          };
+          defaultTags = {
+            development = true;
+          };
+          apps.emacs = {
+            tags = [ "development" ];
+            home = {
+              programs.emacs.enable = true;
+            };
+          };
+        };
+      };
+    }
+
+This will create a basic Flake with some predefined defaults for a
+single-user NixOS system with home-manager enabled. You may then
+build/switch to the system using:
+
+    nixos-rebuild switch --flake .#my-first-host
+
+Since this is layered with `flake-parts` you may then choose to
+manage/deploy your hosts however you wish.
+
 ## Why?
 
 This is primarily an example in making it really easy to build flakes
@@ -78,63 +137,6 @@ NOTE: This is an *optional* feature. If `enable` is specified (either
 `enable = true` or `enable = false`), then that overrides tag behavior.
 
 ## Usage
-
-This uses [flake-parts](https://flake.parts). You don't have to (and I
-built it without any explicit dependencies on it) but I leave it as an
-exercise to the reader to figure out how to use this otherwise.
-
-To start:
-
-    {
-      description = "My Nix system configuration with nix-config-modules";
-
-      inputs = {
-        nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-        flake-parts.url = "github:hercules-ci/flake-parts";
-        nix-config-modules.url = "path:/home/chadac/code/github.com/chadac/nix-config-modules";
-        home-manager = {
-          url = "github:nix-community/home-manager";
-          inputs.nixpkgs.follows = "nixpkgs";
-        };
-      };
-
-      outputs = { flake-parts, ... }@inputs: flake-parts.lib.mkFlake { inherit inputs; } {
-        imports = [ inputs.nix-config-modules.flakeModule ];
-        # this avoids errors when running `nix flake show`
-        systems = [ ];
-
-        nix-config = {
-          hosts.my-first-host = {
-            kind = "nixos";
-            system = "x86_64-linux";
-            username = "chadac";
-            email = "chad@cacrawford.org";
-            homeDirectory = "/home/chadac";
-            tags = {
-              getting-started = true;
-            };
-          };
-          defaultTags = {
-            development = true;
-          };
-          apps.emacs = {
-            tags = [ "development" ];
-            home = {
-              programs.emacs.enable = true;
-            };
-          };
-        };
-      };
-    }
-
-This will create a basic Flake with some predefined defaults for a
-single-user NixOS system with home-manager enabled. You may then
-build/switch to the system using:
-
-    nixos-rebuild switch --flake .#my-first-host
-
-Since this is layered with `flake-parts` you may then choose to
-manage/deploy your hosts however you wish.
 
 ### Creating apps
 
