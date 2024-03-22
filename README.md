@@ -13,7 +13,7 @@ This uses [flake-parts](https://flake.parts). You don't have to (and I
 built it without any explicit dependencies on it) but I leave it as an
 exercise to the reader to figure out how to use this otherwise.
 
-To start:
+A sample config may look like:
 
 ```nix
 {
@@ -103,6 +103,54 @@ manage/deploy your hosts however you wish.
 
 For a more in-depth example of how this can be used, see
 [github:chadac/dotfiles](https://github.com/chadac/dotfiles).
+
+### Importing existing NixOS/home-manager modules
+
+If you have NixOS/home-manager configurations specified in a standard
+`configuration.nix` or `home.nix`, you can import them without needing
+to refactor anything. This enables you to onboard to using Flakes for
+your configuration.
+
+To import existing configurations to a **single host**:
+
+```nix
+  outputs = { flake-parts, ... }@inputs: flake-parts.lib.mkFlake { inherit inputs; } {
+    # import nix-config-modules
+    imports = [ inputs.nix-config-modules.flakeModule ];
+
+    # this avoids errors when running `nix flake show`
+    systems = [ ];
+
+    nix-config = {
+      hosts.my-host = {
+        # <...>
+        nixos = {
+          imports = [ ./configuration.nix ];
+        };
+        home = {
+          imports = [ ./home.nix ];
+        };
+      };
+    };
+```
+
+To import existing configurations **globally**:
+
+```nix
+  outputs = { flake-parts, ... }@inputs: flake-parts.lib.mkFlake { inherit inputs; } {
+    # import nix-config-modules
+    imports = [ inputs.nix-config-modules.flakeModule ];
+    systems = [ ];
+    nix-config = {
+      modules = {
+        nixos = [ ./configuration.nix ];
+        home = [ ./home.nix ];
+      };
+      hosts.my-host = {
+        # you will still need to specify `system` and `kind`
+      };
+    };
+```
 
 ## Why?
 
