@@ -103,14 +103,25 @@ To start:
         # this avoids errors when running `nix flake show`
         systems = [ ];
 
-        nix-config.hosts.my-first-host = {
-          kind = "nixos";
-          system = "x86_64-linux";
-          username = "chadac";
-          email = "chad@cacrawford.org";
-          homeDirectory = "/home/chadac";
-          tags = {
-            getting-started = true;
+        nix-config = {
+          hosts.my-first-host = {
+            kind = "nixos";
+            system = "x86_64-linux";
+            username = "chadac";
+            email = "chad@cacrawford.org";
+            homeDirectory = "/home/chadac";
+            tags = {
+              getting-started = true;
+            };
+          };
+          defaultTags = {
+            development = true;
+          };
+          apps.emacs = {
+            tags = [ "development" ];
+            home = {
+              programs.emacs.enable = true;
+            };
           };
         };
       };
