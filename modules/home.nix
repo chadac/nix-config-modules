@@ -24,7 +24,9 @@ let
       ++ [ config.home ];
   });
 
-  homeHosts = filterAttrs (_: host: host.kind == "home-manager") config.hosts;
+  # include everything because sometimes we want to just apply HM
+  # profiles locally on NixOS
+  homeHosts = config.hosts;
 in {
   options = {
     hosts = mkOption {
