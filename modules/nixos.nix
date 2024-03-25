@@ -37,12 +37,9 @@ in {
     };
   };
   config.nixosConfigurations = mapAttrs
-    (_: host: inputs.nixpkgs.lib.nixosSystem {
-      modules = host._internal.nixosModules ++ [
-        {
-          _module.args.host = host;
-          nixpkgs.pkgs = host._internal.pkgs;
-        }
+    (_: host: host._internal.pkgs.nixos {
+      imports = host._internal.nixosModules ++ [
+        { _module.args.host = host; }
       ];
     })
     nixosHosts
