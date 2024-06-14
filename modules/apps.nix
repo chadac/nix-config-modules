@@ -24,7 +24,10 @@ let
     };
     config = let
       apps = (lib.evalModules {
-        modules = moduleType.getSubModules ++ [ config.nix-config ];
+        modules = moduleType.getSubModules ++ [
+          config.nix-config
+          { _module.args.host = config; }
+        ];
       }).config.apps;
     in {
       _internal.apps = builtins.filter
@@ -62,5 +65,9 @@ in {
     hosts = mkOption {
       type = types.attrsOf hostSubmodule;
     };
+  };
+
+  config = {
+    _module.args.host = lib.mkDefault { };
   };
 }

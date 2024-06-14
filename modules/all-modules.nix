@@ -1,12 +1,13 @@
 [
   ./apps.nix
-  ./tags.nix
   ./home.nix
   ./home-apps.nix
   ./hosts.nix
   ./modules.nix
   ./nixos.nix
   ./nixpkgs.nix
+  ./system-apps.nix
+  ./tags.nix
   ./apps/defaults.nix
   ./apps/single-user.nix
   ./apps/getting-started.nix
