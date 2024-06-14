@@ -157,7 +157,7 @@ To import existing configurations **globally**:
     nix-config = {
       modules = {
         nixos = [ ./configuration.nix ];
-        home = [ ./home.nix ];
+        home-manager = [ ./home.nix ];
       };
       hosts.my-host = {
         # you will still need to specify `system` and `kind`
