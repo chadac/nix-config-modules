@@ -39,7 +39,7 @@ in {
   config.nixosConfigurations = mapAttrs
     (_: host: host._internal.pkgs.nixos {
       imports = host._internal.nixosModules ++ [
-        { _module.args.host = host; }
+        { _module.args = { inherit host inputs; }; }
       ];
     })
     nixosHosts
