@@ -17,7 +17,7 @@
           useGlobalPkgs = true;
           useUserPackages = true;
           extraSpecialArgs = {
-            inherit host;
+            inherit host inputs;
           };
           users.${host.username} = {
             imports = host._internal.homeModules;
