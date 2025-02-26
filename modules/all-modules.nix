@@ -1,5 +1,6 @@
 [
   ./apps.nix
+  ./darwin.nix
   ./tags.nix
   ./home.nix
   ./home-apps.nix

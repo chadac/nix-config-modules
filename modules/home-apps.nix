@@ -30,6 +30,13 @@ let
           App attribute passed to all generated applications.
         '';
       };
+      systems = mkOption {
+        type = types.nullOr (types.listOf types.str);
+        default = null;
+        description = ''
+          App attribute passed to all generated applications.
+        '';
+      };
       packages = mkOption {
         type = types.listOf types.str;
         description = ''
@@ -65,7 +72,7 @@ in {
       (homeApp: map (pkg: {
         name = pkg;
         value = {
-          inherit (homeApp) enable tags disableTags;
+          inherit (homeApp) enable tags systems disableTags;
           home = { pkgs, ... }: {
             home.packages = [ pkgs.${pkg} ];
           };

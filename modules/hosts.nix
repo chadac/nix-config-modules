@@ -25,13 +25,14 @@ let
         '';
       };
       kind = mkOption {
-        type = types.enum [ "nixos" "home-manager" ];
+        type = types.enum [ "nixos" "home-manager" "darwin" ];
         default = "nixos";
         description = lib.mdDoc ''
           The type of host this is. Two options:
 
           * `nixos`: A NixOS system configuration. Generates NixOS with
             home-manager installed.
+          * `darwin`: Deploys via `nix-darwin`, includes `home-manager`.
           * `home-manager`: A home-manager configuration. Generates only the
             home-manager configuration for the host.
         '';
@@ -54,6 +55,7 @@ let
       nixpkgs = mkModuleOption "nixpkgs configurations";
       nixos = mkModuleOption "NixOS configurations";
       home = mkModuleOption "home-manager configurations";
+      darwin = mkModuleOption "nix-darwin configurations";
     };
 
     config = {
@@ -66,7 +68,7 @@ in {
       type = types.attrsOf hostType;
       default = { };
       description = ''
-        Individual NixOS/home-manager configurations for individual machines or
+        Individual NixOS/home-manager/darwin configurations for machines or
         classes of machines.
 
         Each host initializes a separate copy of `nixpkgs` and has its own

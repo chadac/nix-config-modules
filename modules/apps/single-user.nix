@@ -54,6 +54,18 @@ in {
         };
         users.groups.${host.username} = {};
       };
+
+      darwin = { host, ... }: {
+        nixpkgs.pkgs = host._internal.pkgs;
+        nix.settings = {
+          trusted-users = [ host.username ];
+          experimental-features = [ "nix-command" "flakes" ];
+        };
+        users.users.${host.username} = {
+          home = host.homeDirectory;
+        };
+      };
+
       home = { host, ... }: {
         home = {
           inherit (host) username homeDirectory;

@@ -29,24 +29,43 @@ in types.submodule {
       type = types.listOf types.str;
       default = [ ];
       description = ''
-        List of tags that will disable the
+        List of tags that will disable the app.
+      '';
+    };
+    systems = mkOption {
+      type = types.nullOr (types.listOf types.str);
+      default = null;
+      description = ''
+        If set, this application will only be available on the given systems.
+
+        This overrides `enable`.
       '';
     };
     enablePredicate = mkOption {
       type = types.functionTo types.bool;
       default = { host, app, ... }:
-        if (app.enable != null) then app.enable
-        else if (app.tags == [ ]) then true
-        else (
-          (builtins.any (tag: host.tags.${tag} or (throw "tag does not exist: '${tag}'")) app.tags)
-          && !(builtins.any (tag: host.tags.${tag} or (throw "tag does not exist: '${tag}'")) app.disableTags)
-        )
+        (
+          if (app.enable != null) then app.enable
+          else if (app.tags == [ ]) then true
+          else (
+            (builtins.any (tag: host.tags.${tag} or (throw "tag does not exist: '${tag}'")) app.tags)
+            && !(builtins.any (tag: host.tags.${tag} or (throw "tag does not exist: '${tag}'")) app.disableTags)
+          )
+        ) && (app.systems == null || (builtins.elem host.system app.systems))
       ;
       description = lib.mdDoc ''
         Predicate used to determine if the given app should be enabled on the given host.
 
         It's recommended not to override this function, as its default behavior
         incorporates forceEnable, tags and disableTags.
+      '';
+    };
+    darwin = mkOption {
+      type = types.deferredModule;
+      default = { };
+      description = lib.mdDoc ''
+        `nix-darwin` configurations. See the [nix-darwin manual](https://daiderd.com/nix-darwin/manual/index.html)
+         for more information.
       '';
     };
     home = mkOption {
