@@ -36,6 +36,7 @@ in types.submodule {
       type = types.functionTo types.bool;
       default = { host, app, ... }:
         if (app.enable != null) then app.enable
+        else if (app.tags == [ ]) then true
         else (
           (builtins.any (tag: host.tags.${tag} or (throw "tag does not exist: '${tag}'")) app.tags)
           && !(builtins.any (tag: host.tags.${tag} or (throw "tag does not exist: '${tag}'")) app.disableTags)
