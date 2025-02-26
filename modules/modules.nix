@@ -8,6 +8,13 @@ in
 {
   options = {
     modules = {
+      darwin = mkOption {
+        type = types.listOf types.deferredModule;
+        default = [ ];
+        description = ''
+          Additional global modules to add to each nix-darwin configuration.
+        '';
+      };
       nixos = mkOption {
         type = types.listOf types.deferredModule;
         default = [ ];

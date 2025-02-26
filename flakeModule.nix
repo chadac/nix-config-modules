@@ -25,6 +25,7 @@ in {
 
   config = {
     flake = {
+      darwinConfigurations = config.nix-config.darwinConfigurations;
       homeConfigurations = config.nix-config.homeConfigurations;
       nixosConfigurations =  config.nix-config.nixosConfigurations;
     };

@@ -13,6 +13,9 @@
     home = {
       home.stateVersion = "23.11";
     };
+    darwin = {
+      system.stateVersion = 5;
+    };
   };
 
   defaultTags = {

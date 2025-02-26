@@ -24,6 +24,22 @@
           };
         };
       };
+
+      darwin = { host, ... }: {
+        imports = [
+          inputs.home-manager.darwinModules.home-manager
+        ];
+        home-manager = {
+          useGlobalPkgs = true;
+          useUserPackages = true;
+          extraSpecialArgs = {
+            inherit host;
+          };
+          users.${host.username} = {
+            imports = host._internal.homeModules;
+          };
+        };
+      };
     };
 
     defaultTags.home-manager = true;
