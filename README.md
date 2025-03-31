@@ -1,11 +1,62 @@
 # nix-config-modules
 
-Modules to combine your NixOS, home-manager and nixpkgs
-configurations. This provides a means for people to get started with
-configuring flake-based Nix configs without needing to dive deep into
-understanding how Flakes work while also providing power users with
-options to configure multiple hosts in a simple and maximally
-configurable manner.
+A module system on top of NixOS, home-manager, nixpkgs, and nix-darwin
+to simplify your flake-based Nix connfigurations. The main
+contribution of this setup is an abstraction of your configuration
+into *apps* (which can contain combined
+NixOS/Home-manager/Nixpkgs/nix-darwin configurations) and *hosts*
+(which allow you to specify your system configuration and which apps
+you want to use).
+
+With this module setup, it is much easier to colocate similar
+configurations in the same file. For example, rather than storing your
+Emacs configuration in three separate files, in nix-config-modules,
+emacs would be configured with:
+
+```nix
+  { inputs, ... }:
+  nix-config.apps.emacs = {
+    tags = [ "development" ];
+    # we can separately configure settings to the `nixpkgs` setup
+    nixpkgs = {
+      # this means you can conditionally apply overlays when desired
+      params.overlays = [ inputs.emacs-overlay.overlay ];
+      # you can also configure allowed unfree packages on a per-app basis
+      packages.unfree = [ "terraform" ];
+    };
+    nixos = {
+      services.emacs.enable = true;
+    };
+    home = { pkgs, ... }: {
+      programs.emacs = {
+        enable = true;
+        package = pkgs.emacs-unstable;
+      };
+    };
+  };
+```
+
+You can then configure a host to use emacs with:
+
+```nix
+nix-config.hosts.my-host = {
+  kind = "nixos";
+  system = "x86_64-linux";
+  # <...>
+
+  # install any app marked with the "development" tag
+  tags.development = true;
+
+  # or you can directly enable emacs with
+  nix-config = {
+    apps.emacs.enable = true;
+  };
+};
+```
+
+This enables you to compose a mix of configurations for many systems
+together *without* needing to repeat yourself or design a mechanism
+for selectively enabling/disabling features on a host-by-host basis.
 
 ## Getting started
 
@@ -225,7 +276,7 @@ something like:
 
 ```nix
 # host 1
-xsession.windowManager.i3.enable = true;
+xsession.windowManager.i3.enable = true
 xsession.windowManager.sway.enable = false;
 
 # host 2
