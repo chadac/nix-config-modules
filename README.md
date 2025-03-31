@@ -10,8 +10,9 @@ you want to use).
 
 With this module setup, it is much easier to colocate similar
 configurations in the same file. For example, rather than storing your
-Emacs configuration in three separate files, in nix-config-modules,
-emacs would be configured with:
+Emacs configuration in many separate files with a generic mixed
+NixOS/HM/Darwin/generic package setup, you can instead configure it
+with:
 
 ```nix
   { inputs, ... }:
@@ -25,7 +26,16 @@ emacs would be configured with:
       packages.unfree = [ "terraform" ];
     };
     nixos = {
-      services.emacs.enable = true;
+      services.emacs = {
+        enable = true;
+        package = pkgs.emacs-unstable;
+      };
+    };
+    darwin = {
+      services.emacs = {
+        enable = true;
+        package = pkgs.emacs-unstable;
+      };
     };
     home = { pkgs, ... }: {
       programs.emacs = {
