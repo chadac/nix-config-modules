@@ -7,10 +7,17 @@ let
     types
   ;
 
-in types.submodule {
+in types.submodule ({ name, ... }: {
   _file = __curPos.file;
 
   options = {
+    name = mkOption {
+      type = types.str;
+      default = name;
+      description = ''
+        The app name. Automatically set.
+      '';
+    };
     enable = mkOption {
       type = types.nullOr types.bool;
       default = null;
@@ -23,6 +30,13 @@ in types.submodule {
       default = [ ];
       description = ''
         List of tags that, when supplied, will enable the given app on the given host.
+      '';
+    };
+    description = mkOption {
+      type = types.str;
+      default = "";
+      description = ''
+        Description of the app.
       '';
     };
     disableTags = mkOption {
@@ -92,4 +106,4 @@ in types.submodule {
       '';
     };
   };
-}
+})
