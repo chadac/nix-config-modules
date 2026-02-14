@@ -22,10 +22,8 @@ let
               type = types.listOf types.raw;
               default = [ ];
             };
-            config = let
-              options = import "${inputs.nixpkgs}/pkgs/top-level/config.nix";
-            in mkOption {
-              type = types.submodule options;
+            config = mkOption {
+              type = types.submodule (import "${inputs.nixpkgs}/pkgs/top-level/config.nix");
               default = { };
             };
           };
@@ -47,35 +45,16 @@ let
           options = {
             unfree = mkOption { type = types.listOf types.str; default = [ ]; };
             insecure = mkOption { type = types.listOf types.str; default = [ ]; };
-            nonSource = mkOption { type = types.listOf types.str; default = [ ]; };
           };
         };
-      };
-
-      params = mkOption {
-        type = types.submodule {
-          options = {
-            config = mkOption {
-              type = types.submodule {
-                options = {
-                  allowUnfreePredicate = mkOption { type = types.functionTo types.bool; default = x: false; };
-                  allowInsecurePredicate = mkOption { type = types.functionTo types.bool; default = x: false; };
-                  permittedInsecurePackages = mkOption { type = types.listOf types.str; default = [ ]; };
-                  allowNonSourcePredicate = mkOption { type = types.functionTo types.bool; default = x: false; };
-                  allowlistedLicenses = mkOption { type = types.listOf types.str; default = [ ]; };
-                  blocklistedLicenses = mkOption { type = types.listOf types.str; default = [ ]; };
-                };
-              };
-            };
-          };
-        };
+        default = {};
       };
     };
 
+    # Map packages.unfree/insecure to the new nixpkgs config options
     config = {
-      params.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) config.packages.unfree;
-      params.config.allowInsecurePredicate = pkg: builtins.elem (lib.getName pkg) config.packages.insecure;
-      params.config.allowNonSourcePredicate = pkg: builtins.elem (lib.getName pkg) config.packages.nonSource;
+      params.config.allowUnfreePackages = config.packages.unfree;
+      params.config.permittedInsecurePackages = config.packages.insecure;
     };
   };
 
